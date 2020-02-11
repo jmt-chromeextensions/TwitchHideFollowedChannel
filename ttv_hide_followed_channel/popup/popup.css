@@ -1,0 +1,28 @@
+/* General */
+
+html
+{
+	height:fit-content; /* Set popup heigth to its content dynamically */
+}
+
+body 
+{
+	height:fit-content;
+}
+
+* 
+{
+	color: #f7f7f8;
+	background-color: #772ce8;
+}
+
+h1
+{
+	font-family: Roobert,Helvetica Neue,Helvetica,Arial,sans-serif;
+	white-space: nowrap;
+}
+
+p:hover {
+	text-decoration:underline;
+	cursor:pointer;
+}
