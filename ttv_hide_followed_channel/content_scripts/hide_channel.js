@@ -8,15 +8,22 @@ $( document ).ready(function() {
 	' div.tw-flex-grow-1 > div:nth-child(1) > div.tw-relative.tw-transition-group';
 	var followedChannelsListDivNode = document.querySelector(followedChannelsListDivSelector);
 	var followedChannelsListDiv = $(followedChannelsListDivSelector);
+	var channelDivClass = ".tw-transition.tw-transition--duration-medium.tw-transition--enter-done.tw-transition__scale-over.tw-transition__scale-over--enter-done"
 	
+	// List of channels to be hidden
 	var hiddenChannels = '';
 	var allFollowedChannelsDivs = [];
 	
-	// Context menu option
-	var optionInMenu = false;	
-	
+	// Right clicked channel
 	var channelName;
 	var channelDiv;
+
+	// Context menu option
+	var optionInMenu = false;	
+
+	// Initial interval employed to remove the channels before MutationObserver is operating
+	var initialContinuousRemoval;
+	var stopInterval = 0;
 	
 	// Followed channels' divs aren't initially loaded, so while they are being loaded, the ones containing the names 
 	// of the channels that are wanted to be hidden won't be shown.
@@ -27,6 +34,9 @@ $( document ).ready(function() {
 
 		// Observe initialization
 		mutationObs.observe(followedChannelsListDivNode, { childList: true });
+
+		// Once the MutationObserver takes care of all the channels that are added to the div, it isn't necessary to keep executing this function.
+		//clearInterval(initialContinuousRemoval);
 	  
 	}
 
@@ -42,16 +52,29 @@ $( document ).ready(function() {
 				allFollowedChannelsDivs.push({"name": addedChannelName, "div": addedChannelDiv});
 				
 				if (hiddenChannels.includes(addedChannelName)) 
-					$(addedChannelDiv).hide();
+					$(addedChannelDiv).attr('style','display:none !important');
 			
 			}
 		}
 	}
+
+	// Get the list that contains the currently hidden channels
+    chrome.storage.sync.get('hiddenChannels', function (result) {
+
+        if (result.hiddenChannels) {
+            hiddenChannels = result.hiddenChannels;
+        } else {
+            hiddenChannels = [];
+        }
+		
+		initialContinuousRemoval = setInterval(removeChannelsOnPageLoad, 50);	
+		checkFollowedChannelsDivIsLoaded();
+
+    });
 	
 	// Inbox 📫
 	chrome.extension.onMessage.addListener(function(msg, sender, sendResponse) {
 
-		debugger;
 		// 'Hide this channel' option clicked (message received from background script)
 		if (msg.action == 'hideChannelFromBackground') {
 
@@ -83,87 +106,63 @@ $( document ).ready(function() {
 		
 	});
 	
-	// Get the list that contains the currently hidden channels
-    chrome.storage.sync.get('hiddenChannels', function (result) {
-
-        if (result.hiddenChannels) {
-            hiddenChannels = result.hiddenChannels;
-        } else {
-            hiddenChannels = [];
-        }
-		
-		checkFollowedChannelsDivIsLoaded();
-
-    });
-	
 	// Set context menu dynamically and store pointed channels.
 	$(followedChannelsListDiv)
-	
-	.hover(
-	// Hover: add 'Hide this channel' option to context menu
-		function() {
-			
-			if (!optionInMenu)
-			{
-				chrome.runtime.sendMessage(
-					{action: "addContextMenuOption"},
-					function (response) {
-						optionInMenu = true;
-					}
-				);
-			}
-			
-		},
-		function() {
-			if (optionInMenu)
-			{
-			
-				chrome.runtime.sendMessage(
-					{action: "removeContextMenuOption"},
-					function (response) {
-						optionInMenu = false;
-					}
-				);
-			
-			}
-		}
-	)
-	
+
 	// Focus in: add 'Hide this channel' option to context menu
-	.focusin(
-		function(e) {
-			if (!optionInMenu)
-			{
-				chrome.runtime.sendMessage(
-					{action: "addContextMenuOption"},
-					function (response) {
-						optionInMenu = true;
-					}
-				);
-			}
-		}
-	)
-	.focusout(
-		function(e) {
-			if (optionInMenu)
-			{
-			
-				chrome.runtime.sendMessage(
-					{action: "removeContextMenuOption"},
-					function (response) {
-						optionInMenu = false;
-					}
-				);
-			
-			}
-		}
+	.mouseover(sendAddContextMenuRequest)
+	.mouseout(sendRemoveContextMenuRequest)
+	.focusin(sendAddContextMenuRequest)
+	.focusout(sendRemoveContextMenuRequest)
+
 	// Right click
-	).contextmenu(
+	.contextmenu(
 		function(e) {
-			channelDiv = $(e.target).closest(".tw-transition.tw-transition--duration-medium.tw-transition--enter-done.tw-transition__scale-over.tw-transition__scale-over--enter-done")[0];
+			channelDiv = $(e.target).closest(channelDivClass)[0];
 			channelName = $(channelDiv).find("figure").attr("aria-label"); // The names are gotten this way so the extension can work when the channels are not expanded.
 		}
 	);
+
+	function removeChannelsOnPageLoad () {
+		let channels = $(followedChannelsListDiv).find(channelDivClass);
+		$(channels).each(function() {
+			let channelName = $(this).find("figure").attr("aria-label");
+			if (!(allFollowedChannelsDivs.some(channel => channel.name === channelName)))
+				allFollowedChannelsDivs.push({"name": channelName, "div": this});
+			if (hiddenChannels.includes(channelName))
+				$(this).attr('style','display:none !important');
+		});
+		
+		stopInterval += 1;
+		if (stopInterval == 50)
+			clearInterval(initialContinuousRemoval);
+
+	}
+
+	function sendAddContextMenuRequest () {
+		if (!optionInMenu)
+			{
+				chrome.runtime.sendMessage(
+					{action: "addContextMenuOption"},
+					function (response) {
+						optionInMenu = true;
+					}
+				);
+			}
+	}
+	
+	function sendRemoveContextMenuRequest () {
+		if (optionInMenu)
+			{
+				chrome.runtime.sendMessage(
+					{action: "removeContextMenuOption"},
+					function (response) {
+						optionInMenu = false;
+					}
+				);
+			
+			}
+	}
 	
 	function addHiddenChannel () {
 		hiddenChannels.push(channelName);
@@ -172,7 +171,8 @@ $( document ).ready(function() {
 	
 	function removeHiddenChannel (channelName) {
 		hiddenChannels = hiddenChannels.filter(channel => channel !== channelName);
-		$(allFollowedChannelsDivs.find(channelDiv => channelDiv.name === channelName).div).show();
+		debugger;
+		$(allFollowedChannelsDivs.find(channelDiv => channelDiv.name === channelName).div).attr('style','display:block !important');
 	}
 
 	
