@@ -24,7 +24,6 @@ var stopInterval = 0;
 // Inbox 📫
 chrome.extension.onMessage.addListener(function (msg) {
 
-	debugger;
 	// 'Hide this channel' option clicked (message received from background script)
 	if (msg.action == 'hideChannelFromBackground') {
 
@@ -63,6 +62,13 @@ $(document).ready(function () {
 
 		if (result.hiddenChannels) {
 			hiddenChannels = result.hiddenChannels;
+
+			// If a null value has been saved by accident, it is removed from the storaged list.
+			if (hiddenChannels) {
+				hiddenChannels = hiddenChannels.filter(c => c != null);
+				chrome.storage.sync.set({ 'hiddenChannels': hiddenChannels }, function(){});
+			}
+
 		} else {
 			hiddenChannels = [];
 		}
@@ -172,7 +178,6 @@ function addHiddenChannel() {
 
 function removeHiddenChannel(channelName) {
 	hiddenChannels = hiddenChannels.filter(channel => channel !== channelName);
-	debugger;
 	$(allFollowedChannelsDivs.find(channelDiv => channelDiv.name === channelName).div).attr('style', 'display:block !important');
 }
 
