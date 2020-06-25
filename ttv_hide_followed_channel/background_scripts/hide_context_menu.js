@@ -2,7 +2,7 @@ var tabId; // ID of the tab where the option has been clicked
 
 // Inbox 📫
 chrome.runtime.onMessage.addListener(
-    function(request, sender, sendResponse) {
+    function(request, sendResponse) {
 		
 		if (request.action === "addContextMenuOption")
 			chrome.contextMenus.create(
@@ -39,7 +39,7 @@ chrome.runtime.onMessage.addListener(
     }
 );
 
-function hideChannelClick(itemData) {
+function hideChannelClick() {
 	chrome.tabs.query({active: true, currentWindow: true}, function(tabs){ // Send message to the tab where the option has been clicked
 		tabId = tabs[0].id;
 		chrome.tabs.sendMessage(tabs[0].id, {action: "hideChannelFromBackground"}, function(response) {});  
