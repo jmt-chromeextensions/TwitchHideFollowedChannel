@@ -5,7 +5,7 @@ $(document).ready(function () {
 	var hiddenChannels = [];
 
 	// Inbox 📫
-	chrome.extension.onMessage.addListener(function (msg, sender, sendResponse) {
+	chrome.extension.onMessage.addListener(function (msg) {
 
 		// Added hidden channel (context menu option clicked)
 		if (msg.action == 'hideChannel') {
@@ -15,7 +15,7 @@ $(document).ready(function () {
 				return c1.localeCompare(c2, 'en', {'sensitivity': 'base'});
 			});
 
-			addChannelToDiv(msg.channelName);
+			addChannelToDiv(msg.channelName, false);
 		}
 
 	});
@@ -51,19 +51,24 @@ $(document).ready(function () {
 	});
 
 	// Add new hidden channel to pop-up
-	function addChannelToDiv(channelName) {
+	function addChannelToDiv(channelName, initial_load = true) {
 		$(noHiddenChannels).hide();
 
 		let new_channel_position_in_list = hiddenChannels.indexOf(channelName);
 
 		if (new_channel_position_in_list == 0)
-			$("#hiddenChannelsList").prepend(`<p id='${channelName}' class='channel_name' title="Show ${channelName} again.">${channelName}</p>`);
+			$("#hiddenChannelsList").prepend(`<p id='${channelName}' class='channel_name' ${!initial_load ? 'style="display:none"' : ''} title="Show ${channelName} again.">${channelName}</p>`);
 		else
 			$("#hiddenChannelsList > .channel_name").eq(new_channel_position_in_list - 1)
-			.after(`<p id='${channelName}' class='channel_name' title="Show ${channelName} again.">${channelName}</p>`);
+			.after(`<p id='${channelName}' class='channel_name' ${!initial_load ? 'style="display:none"' : ''}  title="Show ${channelName} again.">${channelName}</p>`);
 
 		// On click: remove channel from the pop-up and show it again in the followed channels section
 		$("#" + channelName).click({clicked_channel: this}, removeHiddenChannel);
+
+		if (!initial_load)
+			// Slide show animation
+			$("#" + channelName).show('slide', 200);
+
 	}
 
 	// Send message to content script to show the channel's div again
