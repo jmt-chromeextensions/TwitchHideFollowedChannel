@@ -174,16 +174,11 @@ function sendRemoveContextMenuRequest() {
 function addHiddenChannel() {
 	hiddenChannels.push(channelName);
 	chrome.storage.sync.set({ 'hiddenChannels': hiddenChannels }, function () { console.log(`${channelName} won't be shown anymore in your followed channels list.`) })
+	// Note for the future: hidden channels are added here because the pop-up may not be opened, so its JavaScript can't be runned anytime.
 }
 
 function removeHiddenChannel(channelName) {
 	hiddenChannels = hiddenChannels.filter(channel => channel !== channelName);
 	$(allFollowedChannelsDivs.find(channelDiv => channelDiv.name === channelName).div).attr('style', 'display:block !important');
 }
-
-
-
-
-
-
 

@@ -13,7 +13,8 @@ body
 * 
 {
 	color: #f7f7f8;
-	background-color: #772ce8;
+	/* Twitch purple (2020-06-25) */
+	background-color: #772ce8; 
 }
 
 h1
