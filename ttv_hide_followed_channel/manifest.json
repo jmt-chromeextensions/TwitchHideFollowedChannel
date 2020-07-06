@@ -36,6 +36,7 @@
   "permissions": [
 	  "contextMenus",
 	  "storage",
-	  "https://*.twitch.tv/*"
+    "https://*.twitch.tv/*",
+    "https://*.cactus.tools/*"
 	]
 }

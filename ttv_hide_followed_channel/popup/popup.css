@@ -2,7 +2,7 @@
 
 html
 {
-	height:fit-content; /* Set popup heigth to its content dynamically */
+	height:fit-content; /* Set popup height to its content dynamically */
 }
 
 body 
@@ -17,6 +17,10 @@ body
 	background-color: #772ce8; 
 }
 
+header {
+	padding: 1px 10px 1px 10px;
+}
+
 h1
 {
 	font-family: Roobert,Helvetica Neue,Helvetica,Arial,sans-serif;
@@ -26,4 +30,39 @@ h1
 p:hover {
 	text-decoration:underline;
 	cursor:pointer;
+}
+
+.add_new_channel {
+	margin-top: 10px;
+    margin-bottom: 5px;
+	text-align: center;
+}
+
+.add_new_channel * {
+	position: relative;
+}
+
+.btn_add {
+	cursor: pointer;
+}
+
+input.channel_name_input:focus {
+	outline-width: 0;
+}
+
+.channel_name_input {
+	bottom: 12px;
+	width: 0%;
+	padding-bottom: 4px;
+	border-width: 0px 0 2px 0;
+    border-style: solid;
+    border-color: white;
+}
+
+.channel_name_input::placeholder {
+	color: rgb(200, 200, 200);
+}
+
+.margin_left_6px {
+	margin-left: 6px;
 }

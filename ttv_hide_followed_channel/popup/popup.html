@@ -16,10 +16,18 @@
 <!-- Sofisticated hr tag -->
 <hr>
 
-<div id="hiddenChannelsList">
-</div>
+<div id="hidden_channels">
 
-<div id="noHiddenChannels" style="display:none"> There aren't any hidden channels. </div>
+	<div class="add_new_channel" id="add_new_channel">
+		<input type="text" id="channel_name" class="channel_name_input" placeholder="Channel name..." maxlength="30" style="display: none;">
+		<img src="../icons/add.png" id="btn_add_channel" class="btn_add" alt="Add new channel" width="32" height="32">
+	</div>
+
+	<div id="hidden_channels_list" class="margin_left_6px"></div>
+
+	<span id="no_hidden_channels" class="margin_left_6px" style="display:none"> There aren't any hidden channels. </div>
+
+</div>
 
 <div style="display:none">Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div> 
 </body>

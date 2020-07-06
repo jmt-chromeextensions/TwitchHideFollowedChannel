@@ -18,10 +18,7 @@ chrome.runtime.onMessage.addListener(
 		
 		else if (request.action == 'sendMessageToOtherTabsAndPopup') { // Send a message to every Twitch tab to inform that a channel must be hidden.
 
-			debugger;
-
 			chrome.runtime.sendMessage({action: "hideChannel", channelName: request.channelName}); // Send message to popup script
-			
 			chrome.tabs.query({url: "https://*.twitch.tv/*"}, function(tabs){
 			
 				for (var i = 0, length = tabs.length; i < length; i++) {
