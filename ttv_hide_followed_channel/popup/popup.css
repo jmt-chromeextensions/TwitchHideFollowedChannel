@@ -33,6 +33,7 @@ p:hover {
 }
 
 .add_new_channel {
+	height: 41px;
 	margin-top: 10px;
     margin-bottom: 5px;
 	text-align: center;

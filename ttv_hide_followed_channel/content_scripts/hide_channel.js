@@ -37,15 +37,13 @@ chrome.extension.onMessage.addListener(function (msg) {
 			}
 		);
 
-	// In some other Twitch tab, a channel has been hidden (the storage has been updated already)
+	// In some other Twitch tab or in the pop-up, a channel has been hidden (the storage has been updated already)
 	} else if (msg.action == 'hideChannelFromContent') {
 
 		hiddenChannels.push(msg.channelName);
-		if ($(allFollowedChannelsDivs.find(channelDiv => channelDiv.name === msg.channelName)))
-			$(allFollowedChannelsDivs.find(channelDiv => channelDiv.name === msg.channelName).div).attr('style', 'display:none !important');
+		$(allFollowedChannelsDivs.find(channelDiv => channelDiv.name.toUpperCase() === msg.channelName.toUpperCase()).div).hide('slide', 200);
 
-
-	} else { // Removed channel from popup
+	} else { // Removed channel from pop-up
 
 		if (msg.action == 'showChannelAgain') {
 			removeHiddenChannel(msg.channelName);
@@ -179,6 +177,6 @@ function addHiddenChannel() {
 
 function removeHiddenChannel(channelName) {
 	hiddenChannels = hiddenChannels.filter(channel => channel !== channelName);
-	$(allFollowedChannelsDivs.find(channelDiv => channelDiv.name === channelName).div).show('slide', 200);
+	$(allFollowedChannelsDivs.find(channelDiv => channelDiv.name.toUpperCase() === channelName.toUpperCase()).div).show('slide', 200);
 }
 
