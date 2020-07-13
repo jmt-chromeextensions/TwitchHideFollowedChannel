@@ -1,8 +1,12 @@
+const INVALID_INPUT = "Usernames must contain between 4 and 25 characters (only letters, numbers and underscores are allowed)."
+const USERNAME_NOT_EXIST = "This channel does not exist."
 const TWITCH_PURPLE_TETRADIC_COLORS = ["#e8b02c", "#9de82c", "#e82c9d"]
+const TWITCH_USERNAME_PATTERN = /^[a-zA-Z0-9_]{4,25}$/
 
 $(document).ready(function () {
 
 	var hiddenChannels = [];
+	var valid_input;
 
 	// Inbox 📫
 	chrome.extension.onMessage.addListener(function (msg) {
@@ -39,10 +43,18 @@ $(document).ready(function () {
 	// Add channel button
 	$("#btn_add_channel").click(addNewChannelFromInput);
 
-	// Enter key pressed on input
-	$("#channel_name").keypress(function (e) {
-		if (e.which == 13) 
+	// Validate input on key up
+	$("#channel_name").bind ('input', (delay(checkChannelNameIsValid, 500)));
+	$("#channel_name").bind ('input', function () {valid_input = false; });
+
+	// Enter pressed: submit input's value
+	$("#channel_name").keyup(function (e) {
+		if (!$(this).val())
+			$("#invalid_username").hide();
+
+		if (e.which == 13 && !	$("#btn_add_channel").hasClass("inactive")) {
 			addNewChannelFromInput();
+		}
 	});
 
 	// Set add button animations
@@ -66,39 +78,29 @@ $(document).ready(function () {
 			});
 	})
 
-	function addNewChannelFromInput() {
-		if (!$("#channel_name").val())
-			$("#channel_name").stop().effect( "shake", {distance:5, times:2});
-		else {
-			addNewChannel($("#channel_name").val(), false, true);
-			checkIfUsernameExists($("#channel_name").val());
-			$("#channel_name").val('');
-		}
-	}
-
-	function addNewChannel (channelName, initial_load = true) {
-		hiddenChannels.push(channelName);
+	function addNewChannel (channel_name, initial_load = true) {
+		hiddenChannels.push(channel_name);
 			hiddenChannels.sort(function (c1, c2) {
 				return c1.localeCompare(c2, 'en', {'sensitivity': 'base'});
 			});
 
-			addChannelToDiv(channelName, initial_load);
+			addChannelToDiv(channel_name, initial_load);
 	}
 
 	// Add new hidden channel to pop-up
-	function addChannelToDiv(channelName, initial_load = true) {
+	function addChannelToDiv(channel_name, initial_load = true) {
 		$(no_hidden_channels).hide();
 
-		let new_channel_position_in_list = hiddenChannels.indexOf(channelName);
+		let new_channel_position_in_list = hiddenChannels.indexOf(channel_name);
 
 		if (new_channel_position_in_list == 0)
-			$("#hidden_channels_list").prepend(`<p id='${channelName}' class='channel_name_list' ${!initial_load ? 'style="display:none"' : ''} title="Show ${channelName} again.">${channelName}</p>`);
+			$("#hidden_channels_list").prepend(`<p id='${channel_name}' class='channel_name_list' ${!initial_load ? 'style="display:none"' : ''} title="Show ${channel_name} again.">${channel_name}</p>`);
 		else
 			$("#hidden_channels_list > .channel_name_list").eq(new_channel_position_in_list - 1)
-			.after(`<p id='${channelName}' class='channel_name_list' ${!initial_load ? 'style="display:none"' : ''}  title="Show ${channelName} again.">${channelName}</p>`);
+			.after(`<p id='${channel_name}' class='channel_name_list' ${!initial_load ? 'style="display:none"' : ''}  title="Show ${channel_name} again.">${channel_name}</p>`);
 
 		// On click: remove channel from the pop-up and show it again in the followed channels section
-		$("#" + channelName)
+		$("#" + channel_name)
 			.click({clicked_channel: this}, removeHiddenChannel)
 			.hover // Text color change on hover
 			(function () {
@@ -109,8 +111,58 @@ $(document).ready(function () {
 
 		if (!initial_load)
 			// Slide show animation
-			$("#" + channelName).show('slide', 200);
+			$("#" + channel_name).show('slide', 200);
 
+	}
+
+	async function checkChannelNameIsValid() {
+		if (!$(this).val())
+			return
+
+		if ((this).checkValidity()) {
+			let channel_name = $("#channel_name").val();
+			$('*').addClass('cursor_wait');
+			$("#btn_add_channel").addClass("inactive");
+
+			let username_exists = await checkIfUsernameExists(channel_name);
+			debugger;
+			if (username_exists) {
+				valid_input = true;
+				$("#invalid_username").hide( {effect: "slide", direction: 'up'} );
+			}
+			else 
+			{
+				$("#invalid_username").text(USERNAME_NOT_EXIST);
+				$("#invalid_username").show( {effect: "slide", direction: 'up'} );
+				// setTimeout(() => {
+				// }, 100); 
+			}
+
+			$('*').removeClass('cursor_wait');
+			$("#btn_add_channel").removeClass("inactive");
+		}
+		else {
+			$("#invalid_username").text(INVALID_INPUT);
+			$("#invalid_username").show( {effect: "slide", direction: 'up'} );
+		}
+	}
+
+	function addNewChannelFromInput() {
+		debugger;
+		let channel_name = $("#channel_name").val();
+		if (!channel_name || !valid_input)
+			$("#channel_name").stop().effect("shake", { distance: 5, times: 2 });
+		else {
+
+			addNewChannel(channel_name, false);
+			chrome.storage.sync.set({ 'hiddenChannels': hiddenChannels }, function () { console.log(`${channel_name} won't be shown anymore in your followed channels list.`) })
+			sendMessageToContentScripts(channel_name, "hideChannelFromContent");
+
+			// Clear input
+			$("#channel_name").val('');
+			$("#invalid_username").hide();
+		}
+		
 	}
 
 	function removeHiddenChannel (clicked_channel) {
@@ -126,37 +178,47 @@ $(document).ready(function () {
 		sendMessageToContentScripts(channel_name, "showChannelAgain");
 	}
 
-	function sendMessageToContentScripts(channelName, action) {
+	function sendMessageToContentScripts(channel_name, action) {
 		chrome.tabs.query({ url: "https://*.twitch.tv/*" }, function (tabs) {
 			for (var i = 0, length = tabs.length; i < length; i++) {
-				chrome.tabs.sendMessage(tabs[i].id, { action: action, channelName: channelName }, function () { });
+				chrome.tabs.sendMessage(tabs[i].id, { action: action, channelName: channel_name }, function () { });
 			}
 		});
 	}
 
-	function checkIfUsernameExists(channelName) {
-		$.ajax(
-			{
-				type: "GET",
-				url: `https://cactus.tools/twitch/username?username=${channelName}`,
-				async: true,
-				success: function (page_html) {
-					if (page_html.includes(`<div class="alert alert-danger">The username <strong>${channelName}</strong> is <strong>NOT</strong> available!</div>`)) {
-						chrome.storage.sync.set({ 'hiddenChannels': hiddenChannels }, function () { console.log(`${channelName} won't be shown anymore in your followed channels list.`) })
-						sendMessageToContentScripts(channelName, "hideChannelFromContent");
-					} else {
-						$(`#${channelName}`)
-							.css("color", "black")
-							.attr("title", "This channel does not exist. It will be removed.")
-							.unbind('mouseenter mouseleave');
-					}
-				},
-				error: function () { // If there is an error or cactus.tools is not available the channel is added and we don't ask any questions.
-					chrome.storage.sync.set({ 'hiddenChannels': hiddenChannels }, function () { console.log(`${channelName} won't be shown anymore in your followed channels list.`) })
-					sendMessageToContentScripts(channelName, "hideChannelFromContent");
+	// cactus.tools
+	function checkIfUsernameExists(channel_name) {
+		return new Promise(resolve => {
+			$.ajax(
+				{
+					type: "GET",
+					url: `https://cactus.tools/twitch/username?username=${channel_name}`,
+					async: true,
+					success: function (page_html) {
+						if (page_html.includes(`<div class="alert alert-danger">The username <strong>${channel_name}</strong> is <strong>NOT</strong> available!</div>`)) {
+							resolve(true);
+						} else {
+							resolve(false);
+						}
+					},
+					error: function () { // If there is an error or cactus.tools is not available the channel is added and we don't ask any questions.
+						resolve(true);
 				}
-				
+	
 			});
+		  });
+	}
+
+	// https://stackoverflow.com/a/1909508/9252531
+	function delay (callback, ms) {
+		var timer = 0;
+		return function () {
+			var context = this, args = arguments;
+			clearTimeout(timer);
+			timer = setTimeout(function () {
+				callback.apply(context, args);
+			}, ms || 0);
+		};
 	}
 
 })
