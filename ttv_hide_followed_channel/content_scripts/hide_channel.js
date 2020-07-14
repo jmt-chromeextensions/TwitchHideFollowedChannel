@@ -1,13 +1,11 @@
-// Global variables
-
 // Followed channels div
 const followedChannelsListDivSelector = '.tw-relative.tw-transition-group';
-const followedChannelsListDivNode = document.querySelector(followedChannelsListDivSelector);
-const followedChannelsListDiv = $(followedChannelsListDivSelector);
 const channelDivClass = ".tw-transition.tw-transition--enter-done.tw-transition__scale-over.tw-transition__scale-over--enter-done"
 
+var followedChannelsListDiv;
+
 // List of channels to be hidden
-var hiddenChannels = '';
+var hiddenChannels = [];
 var allFollowedChannelsDivs = [];
 
 // Right clicked channel
@@ -16,10 +14,6 @@ var channelDiv;
 
 // Context menu option
 var optionInMenu = false;
-
-// Initial interval employed to remove the channels before MutationObserver is operating
-var initialContinuousRemoval;
-var stopInterval = 0;
 
 // Inbox 📫
 chrome.extension.onMessage.addListener(function (msg) {
@@ -55,6 +49,8 @@ chrome.extension.onMessage.addListener(function (msg) {
 
 $(document).ready(function () {
 
+	followedChannelsListDiv = $(followedChannelsListDivSelector);
+
 	// Get the list that contains the currently hidden channels
 	chrome.storage.sync.get('hiddenChannels', function (result) {
 
@@ -67,33 +63,10 @@ $(document).ready(function () {
 				chrome.storage.sync.set({ 'hiddenChannels': hiddenChannels }, function(){});
 			}
 
-		} else {
-			hiddenChannels = [];
-		}
-
-		initialContinuousRemoval = setInterval(removeChannelsOnPageLoad, 50);
+		} 
 		checkFollowedChannelsDivIsLoaded();
 
 	});
-
-
-
-	// Set context menu dynamically and store pointed channels.
-	$(followedChannelsListDiv)
-
-		// Focus in: add 'Hide this channel' option to context menu
-		.mouseover(sendAddContextMenuRequest)
-		.mouseout(sendRemoveContextMenuRequest)
-		.focusin(sendAddContextMenuRequest)
-		.focusout(sendRemoveContextMenuRequest)
-
-		// Right click
-		.contextmenu(
-			function (e) {
-				channelDiv = $(e.target).closest(channelDivClass)[0];
-				channelName = $(channelDiv).find("figure").attr("aria-label"); // The names are gotten this way so the extension can work when the channels are not expanded.
-			}
-		);
 
 });
 
@@ -104,11 +77,42 @@ function checkFollowedChannelsDivIsLoaded() {
 	// Mutation Observer instantiation
 	var mutationObs = new MutationObserver(callbackChannelAdded);
 
-	// Observe initialization
-	mutationObs.observe(followedChannelsListDivNode, { childList: true });
+	/* Observe initialization: once the followed channels div appears, the channels that may have been already added to it are hidden, MutationObserver's instance starts working
+	and mouseover/focus and right click handlers are binded. */
+	let init_observe_interval = setInterval(() => {
+		if ($('.tw-relative.tw-transition-group').length > 0) {
+			clearInterval(init_observe_interval);
 
-	// Once the MutationObserver takes care of all the channels that are added to the div, it isn't necessary to keep executing this function.
-	//clearInterval(initialContinuousRemoval);
+			// Remove channels the div may already contain
+			let channels = $(followedChannelsListDivSelector).find(channelDivClass);
+			$(channels).each(function () {
+				let channelName = $(this).find("figure").attr("aria-label");
+				if (!(allFollowedChannelsDivs.some(channel => channel.name === channelName)))
+					allFollowedChannelsDivs.push({ "name": channelName, "div": this });
+				if (hiddenChannels.includes(channelName))
+					$(this).attr('style', 'display:none !important');
+			});
+
+			// Set context menu dynamically and store pointed channels.
+			$(followedChannelsListDivSelector)
+
+			// Focus in: add 'Hide this channel' option to context menu
+			.mouseover(sendAddContextMenuRequest)
+			.mouseout(sendRemoveContextMenuRequest)
+			.focusin(sendAddContextMenuRequest)
+			.focusout(sendRemoveContextMenuRequest)
+
+			// Right click
+			.contextmenu(
+				function (e) {
+					channelDiv = $(e.target).closest(channelDivClass)[0];
+					channelName = $(channelDiv).find("figure").attr("aria-label"); // The names are gotten this way so the extension can work when the channels are not expanded.
+				}
+			);
+
+			mutationObs.observe(document.querySelector(followedChannelsListDivSelector), { childList: true, subtree: true });
+		}
+	}, 100);
 
 }
 
@@ -121,29 +125,15 @@ function callbackChannelAdded(mutations) {
 			var addedChannelDiv = mutations[i].addedNodes[0];
 			var addedChannelName = $(addedChannelDiv).find("figure").attr("aria-label");
 
-			allFollowedChannelsDivs.push({ "name": addedChannelName, "div": addedChannelDiv });
+			if (addedChannelName) {
+				allFollowedChannelsDivs.push({ "name": addedChannelName, "div": addedChannelDiv });
 
-			if (hiddenChannels.includes(addedChannelName))
-				$(addedChannelDiv).attr('style', 'display:none !important');
+				if (hiddenChannels.includes(addedChannelName))
+					$(addedChannelDiv).attr('style', 'display:none !important');
+			}
 
 		}
 	}
-}
-
-function removeChannelsOnPageLoad() {
-	let channels = $(followedChannelsListDiv).find(channelDivClass);
-	$(channels).each(function () {
-		let channelName = $(this).find("figure").attr("aria-label");
-		if (!(allFollowedChannelsDivs.some(channel => channel.name === channelName)))
-			allFollowedChannelsDivs.push({ "name": channelName, "div": this });
-		if (hiddenChannels.includes(channelName))
-			$(this).attr('style', 'display:none !important');
-	});
-
-	stopInterval += 1;
-	if (stopInterval == 50)
-		clearInterval(initialContinuousRemoval);
-
 }
 
 function sendAddContextMenuRequest() {
