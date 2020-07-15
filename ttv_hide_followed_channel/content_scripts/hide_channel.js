@@ -1,6 +1,7 @@
 // Followed channels div
 const followedChannelsListDivSelector = '.tw-relative.tw-transition-group';
 const channelDivClass = ".tw-transition.tw-transition--enter-done.tw-transition__scale-over.tw-transition__scale-over--enter-done"
+const channelDivClass2 = ".tw-transition.tw-transition--enter-active.tw-transition__scale-over.tw-transition__scale-over--enter-active"
 
 var followedChannelsListDiv;
 
@@ -84,7 +85,7 @@ function checkFollowedChannelsDivIsLoaded() {
 			clearInterval(init_observe_interval);
 
 			// Remove channels the div may already contain
-			let channels = $(followedChannelsListDivSelector).find(channelDivClass);
+			let channels = $(followedChannelsListDivSelector).find(`${channelDivClass},${channelDivClass2}`);
 			$(channels).each(function () {
 				let channelName = $(this).find("figure").attr("aria-label");
 				if (!(allFollowedChannelsDivs.some(channel => channel.name === channelName)))
