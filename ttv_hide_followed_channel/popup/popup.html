@@ -1,26 +1,44 @@
 <html>
 
-<head>
-	<link rel="stylesheet" type="text/css" href="popup.css">
-	<script src="../jquery/jquery-3.4.1.min.js"></script>
-	<script src="popup.js"></script>
-</head>
+	<head>
+		<link rel="stylesheet" type="text/css" href="popup.css">
+		<script src="../jquery/jquery-3.4.1.min.js"></script>
+		<script src="../jquery/jquery-ui.min.js"></script>
+		<script src="popup.js"></script>
+	</head>
 
-<body>
+	<body>
 
-<header>
-    <h1>Hidden followed channels<h1>
-</header>
+		<header>
+			<h1>Hidden followed channels<h1>
+		</header>
 
-<!-- Sofisticated hr tag -->
-<hr>
+		<!-- Sofisticated hr tag -->
+		<hr>
 
-<div id="hiddenChannelsList">
-</div>
+		<div id="hidden_channels">
 
-<div id="noHiddenChannels" style="display:none"> There aren't any hidden channels. </div>
+			<div class="add_new_channel" id="add_new_channel">
 
-<div style="display:none">Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div> 
-</body>
+				<input type="text" id="channel_name" class="channel_name_input" autocomplete="off"
+					placeholder="Channel name (between 4 and 25 letters, numbers or underscores)" maxlength="25" pattern="[a-zA-Z0-9_]{4,25}" style="display: none;">
+				<img src="../icons/add.png" id="btn_add_channel" class="btn_add" alt="Add new channel" width="32"
+					height="32">
+
+				<div class="invalid_username"">
+					<span id="invalid_username" style="display:none">
+				</div>
+
+			</div>
+
+			<div id="hidden_channels_list" class="hidden_channels_list margin_left_6px">
+				<span id="no_hidden_channels" style="display:none"> There aren't any hidden channels.
+			</div>
+
+			
+
+		</div>
+
+	</body>
 
 </html>

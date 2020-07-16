@@ -26,16 +26,17 @@
         "https://*.twitch.tv/*"
       ],
       "js": [
-		"jquery/jquery-3.4.1.min.js",
+        "jquery/jquery-3.4.1.min.js",
+        "jquery/jquery-ui.min.js",
         "content_scripts/hide_channel.js"
       ]
     }
   ],
   
   "permissions": [
-	  "activeTab",
 	  "contextMenus",
 	  "storage",
-	  "https://*.twitch.tv/*"
+    "https://*.twitch.tv/*",
+    "https://*.cactus.tools/*"
 	]
 }
