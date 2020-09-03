@@ -125,7 +125,6 @@ $(document).ready(function () {
 			$("#btn_add_channel").addClass("inactive");
 
 			let username_exists = await checkIfUsernameExists(channel_name);
-			debugger;
 			if (username_exists) {
 				valid_input = true;
 				$("#invalid_username").hide( {effect: "slide", direction: 'up'} );
@@ -148,7 +147,6 @@ $(document).ready(function () {
 	}
 
 	function addNewChannelFromInput() {
-		debugger;
 		let channel_name = $("#channel_name").val();
 		if (!channel_name || !valid_input)
 			$("#channel_name").stop().effect("shake", { distance: 5, times: 2 });

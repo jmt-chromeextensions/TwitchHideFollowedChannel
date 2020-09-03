@@ -1,5 +1,5 @@
 // Followed channels div
-const followedChannelsListDivSelector = '.tw-relative.tw-transition-group';
+const followedChannelsListDivSelector = '.side-nav-section:first .tw-relative.tw-transition-group';
 const channelDivClass = ".tw-transition.tw-transition--enter-done.tw-transition__scale-over.tw-transition__scale-over--enter-done"
 const channelDivClass2 = ".tw-transition.tw-transition--enter-active.tw-transition__scale-over.tw-transition__scale-over--enter-active"
 
@@ -100,8 +100,6 @@ function checkFollowedChannelsDivIsLoaded() {
 			// Focus in: add 'Hide this channel' option to context menu
 			.mouseover(sendAddContextMenuRequest)
 			.mouseout(sendRemoveContextMenuRequest)
-			.focusin(sendAddContextMenuRequest)
-			.focusout(sendRemoveContextMenuRequest)
 
 			// Right click
 			.contextmenu(
@@ -138,7 +136,8 @@ function callbackChannelAdded(mutations) {
 }
 
 function sendAddContextMenuRequest() {
-	if (!optionInMenu) {
+	if (!$(this).data("thfc-handler")) {
+		$(this).data('thfc-handler', 'true');	
 		chrome.runtime.sendMessage(
 			{ action: "addContextMenuOption" },
 			function () {
@@ -149,7 +148,8 @@ function sendAddContextMenuRequest() {
 }
 
 function sendRemoveContextMenuRequest() {
-	if (optionInMenu) {
+	if ($(this).data("thfc-handler")) {
+		$(this).removeData('thfc-handler');
 		chrome.runtime.sendMessage(
 			{ action: "removeContextMenuOption" },
 			function () {
