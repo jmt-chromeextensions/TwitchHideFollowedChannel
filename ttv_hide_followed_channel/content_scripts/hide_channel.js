@@ -1,5 +1,6 @@
 // Followed channels div
-const followedChannelsListDivSelector = '.side-nav-section:first .tw-relative.tw-transition-group';
+const followedChannelsListDivSelector = '.side-nav-section:first-child .tw-relative.tw-transition-group';
+const followedChannelsListDivSelector_JQuery = '.side-nav-section:first .tw-relative.tw-transition-group';
 const channelDivClass = ".tw-transition.tw-transition--enter-done.tw-transition__scale-over.tw-transition__scale-over--enter-done"
 const channelDivClass2 = ".tw-transition.tw-transition--enter-active.tw-transition__scale-over.tw-transition__scale-over--enter-active"
 
@@ -50,7 +51,7 @@ chrome.extension.onMessage.addListener(function (msg) {
 
 $(document).ready(function () {
 
-	followedChannelsListDiv = $(followedChannelsListDivSelector);
+	followedChannelsListDiv = $(followedChannelsListDivSelector_JQuery);
 
 	// Get the list that contains the currently hidden channels
 	chrome.storage.sync.get('hiddenChannels', function (result) {
@@ -85,7 +86,7 @@ function checkFollowedChannelsDivIsLoaded() {
 			clearInterval(init_observe_interval);
 
 			// Remove channels the div may already contain
-			let channels = $(followedChannelsListDivSelector).find(`${channelDivClass},${channelDivClass2}`);
+			let channels = $(followedChannelsListDivSelector_JQuery).find(`${channelDivClass},${channelDivClass2}`);
 			$(channels).each(function () {
 				let channelName = $(this).find("figure").attr("aria-label");
 				if (!(allFollowedChannelsDivs.some(channel => channel.name === channelName)))
@@ -95,7 +96,7 @@ function checkFollowedChannelsDivIsLoaded() {
 			});
 
 			// Set context menu dynamically and store pointed channels.
-			$(followedChannelsListDivSelector)
+			$(followedChannelsListDivSelector_JQuery)
 
 			// Focus in: add 'Hide this channel' option to context menu
 			.mouseover(sendAddContextMenuRequest)
