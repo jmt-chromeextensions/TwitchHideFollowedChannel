@@ -44,7 +44,7 @@ $(document).ready(function () {
 	$("#btn_add_channel").click(addNewChannelFromInput);
 
 	// Validate input on key up
-	$("#channel_name").bind ('input', (delay(checkChannelNameIsValid, 500)));
+	$("#channel_name").bind ('input', (delayFunction(checkChannelNameIsValid, 500)));
 	$("#channel_name").bind ('input', function () {valid_input = false; });
 
 	// Enter pressed: submit input's value
@@ -205,18 +205,6 @@ $(document).ready(function () {
 	
 			});
 		  });
-	}
-
-	// https://stackoverflow.com/a/1909508/9252531
-	function delay (callback, ms) {
-		var timer = 0;
-		return function () {
-			var context = this, args = arguments;
-			clearTimeout(timer);
-			timer = setTimeout(function () {
-				callback.apply(context, args);
-			}, ms || 0);
-		};
 	}
 
 })

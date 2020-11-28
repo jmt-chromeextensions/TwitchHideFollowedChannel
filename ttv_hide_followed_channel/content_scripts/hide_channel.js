@@ -83,36 +83,56 @@ function checkFollowedChannelsDivIsLoaded() {
 	and mouseover/focus and right click handlers are binded. */
 	let init_observe_interval = setInterval(() => {
 		if ($('.tw-relative.tw-transition-group').length > 0) {
+
 			clearInterval(init_observe_interval);
-
-			// Remove channels the div may already contain
-			let channels = $(followedChannelsListDivSelector_JQuery).find(`${channelDivClass},${channelDivClass2}`);
-			$(channels).each(function () {
-				let channelName = $(this).find("figure").attr("aria-label");
-				if (!(allFollowedChannelsDivs.some(channel => channel.name === channelName)))
-					allFollowedChannelsDivs.push({ "name": channelName, "div": this });
-				if (hiddenChannels.includes(channelName))
-					$(this).attr('style', 'display:none !important');
-			});
-
-			// Set context menu dynamically and store pointed channels.
-			$(followedChannelsListDivSelector_JQuery)
-
-			// Focus in: add 'Hide this channel' option to context menu
-			.mouseover(sendAddContextMenuRequest)
-			.mouseout(sendRemoveContextMenuRequest)
-
-			// Right click
-			.contextmenu(
-				function (e) {
-					channelDiv = $(e.target).closest(channelDivClass)[0];
-					channelName = $(channelDiv).find("figure").attr("aria-label"); // The names are gotten this way so the extension can work when the channels are not expanded.
-				}
-			);
-
 			mutationObs.observe(document.querySelector(followedChannelsListDivSelector), { childList: true, subtree: true });
+			removeHiddenChannels_AddContextMenuOptions();
+
+			var init_remove_channels_checks = 0;
+
+			// This interval is used to check every second during 15 seconds that none of the chosen-to-be-hidden channels is visible in the div (and also to add mouse handlers to channels).
+			let init_remove_channels_interval = setInterval(() => {
+				init_remove_channels_checks ++;
+				removeHiddenChannels_AddContextMenuOptions();
+
+				if (init_remove_channels_checks == 15) {
+					clearInterval(init_remove_channels_interval);
+					console.log("pal lobby");
+				}
+
+			}, 1000);
 		}
+
 	}, 100);
+
+}
+
+function removeHiddenChannels_AddContextMenuOptions() {
+
+	// Remove channels the div may already contain
+	let channels = $(followedChannelsListDivSelector_JQuery).find(`${channelDivClass},${channelDivClass2}`);
+	$(channels).each(function () {
+		let channelName = $(this).find("figure").attr("aria-label");
+		if (!(allFollowedChannelsDivs.some(channel => channel.name === channelName)))
+			allFollowedChannelsDivs.push({ "name": channelName, "div": this });
+		if (hiddenChannels.includes(channelName))
+			$(this).attr('style', 'display:none !important');
+	});
+
+	// Set context menu dynamically and store pointed channels.
+	$(followedChannelsListDivSelector_JQuery)
+
+		// Focus in: add 'Hide this channel' option to context menu
+		.mouseover(sendAddContextMenuRequest)
+		.mouseout(sendRemoveContextMenuRequest)
+
+		// Right click
+		.contextmenu(
+			function (e) {
+				channelDiv = $(e.target).closest(channelDivClass)[0];
+				channelName = $(channelDiv).find("figure").attr("aria-label"); // The names are gotten this way so the extension can work when the channels are not expanded.
+			}
+		);
 
 }
 
