@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Twitch Hide Followed Channel",
   "short_name": "TTVHideFollowedChannel",
-  "version": "1.1.0.2",
+  "version": "1.1.0.3",
   
   "description": "Twitch: hide a channel from the followed channels column.",
   "icons": {
@@ -18,7 +18,9 @@
   },
   
   "background": {
-    "scripts": ["background_scripts/hide_context_menu.js"]
+    "scripts": [
+      "background_scripts/hide_context_menu.js",
+      "background_scripts/initialize_extension.js"]
   },
   "content_scripts": [
     {
@@ -28,12 +30,14 @@
       "js": [
         "jquery/jquery-3.4.1.min.js",
         "jquery/jquery-ui.min.js",
+        "content_scripts/utils/utils.js",
         "content_scripts/hide_channel.js"
       ]
     }
   ],
   
   "permissions": [
+    "*://*/*",
 	  "contextMenus",
 	  "storage",
     "https://*.twitch.tv/*",
