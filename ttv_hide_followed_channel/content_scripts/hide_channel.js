@@ -82,7 +82,7 @@ function checkFollowedChannelsDivIsLoaded() {
 	/* Observe initialization: once the followed channels div appears, the channels that may have been already added to it are hidden, MutationObserver's instance starts working
 	and mouseover/focus and right click handlers are binded. */
 	let init_observe_interval = setInterval(() => {
-		if ($('.tw-relative.tw-transition-group').length > 0) {
+		if ($('.tw-relative.tw-transition-group').length > 0 && document.querySelector(followedChannelsListDivSelector)) {
 
 			clearInterval(init_observe_interval);
 			mutationObs.observe(document.querySelector(followedChannelsListDivSelector), { childList: true, subtree: true });
