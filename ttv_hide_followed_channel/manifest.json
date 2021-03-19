@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Twitch Hide Followed Channel",
   "short_name": "TTVHideFollowedChannel",
-  "version": "1.1.0.5",
+  "version": "1.1.0.6",
   
   "description": "Twitch: hide a channel from the followed channels column.",
   "icons": {

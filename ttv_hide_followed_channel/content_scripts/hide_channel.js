@@ -95,10 +95,8 @@ function checkFollowedChannelsDivIsLoaded() {
 				init_remove_channels_checks ++;
 				removeHiddenChannels_AddContextMenuOptions();
 
-				if (init_remove_channels_checks == 15) {
+				if (init_remove_channels_checks == 15)
 					clearInterval(init_remove_channels_interval);
-					console.log("pal lobby");
-				}
 
 			}, 1000);
 		}
@@ -111,11 +109,13 @@ function removeHiddenChannels_AddContextMenuOptions() {
 
 	// Remove channels the div may already contain
 	let channels = $(followedChannelsListDivSelector_JQuery).find(`${channelDivClass},${channelDivClass2}`);
+	let hiddenChannelsAllCaps = hiddenChannels.map(c => c.toUpperCase());
+
 	$(channels).each(function () {
 		let channelName = $(this).find("figure").attr("aria-label");
 		if (!(allFollowedChannelsDivs.some(channel => channel.name === channelName)))
 			allFollowedChannelsDivs.push({ "name": channelName, "div": this });
-		if (hiddenChannels.includes(channelName))
+		if (hiddenChannelsAllCaps.includes(channelName.toUpperCase()))
 			$(this).attr('style', 'display:none !important');
 	});
 
@@ -138,6 +138,8 @@ function removeHiddenChannels_AddContextMenuOptions() {
 
 function callbackChannelAdded(mutations) {
 
+	let hiddenChannelsAllCaps = hiddenChannels.map(c => c.toUpperCase());
+
 	for (var i = 0, length = mutations.length; i < length; i++) {
 
 		if (mutations[i].addedNodes[0]) {
@@ -148,7 +150,7 @@ function callbackChannelAdded(mutations) {
 			if (addedChannelName) {
 				allFollowedChannelsDivs.push({ "name": addedChannelName, "div": addedChannelDiv });
 
-				if (hiddenChannels.includes(addedChannelName))
+				if (hiddenChannelsAllCaps.includes(addedChannelName.toUpperCase()))
 					$(addedChannelDiv).attr('style', 'display:none !important');
 			}
 
