@@ -1,8 +1,9 @@
 // Followed channels div
 const followedChannelsListDivSelector = '.side-nav-section:first-child .tw-relative.tw-transition-group';
 const followedChannelsListDivSelector_JQuery = '.side-nav-section:first .tw-relative.tw-transition-group';
-const channelDivClass = ".tw-transition.tw-transition--enter-done.tw-transition__scale-over.tw-transition__scale-over--enter-done"
-const channelDivClass2 = ".tw-transition.tw-transition--enter-active.tw-transition__scale-over.tw-transition__scale-over--enter-active"
+const channelDivClass = ".side-nav-card.tw-relative";
+const channelDivClass2 = ".tw-transition.tw-transition--enter-active.tw-transition__scale-over.tw-transition__scale-over--enter-active";
+const channelDivClass3 = ".tw-transition.tw-transition--enter-done.tw-transition__scale-over.tw-transition__scale-over--enter-done";
 
 var followedChannelsListDiv;
 
@@ -108,7 +109,7 @@ function checkFollowedChannelsDivIsLoaded() {
 function removeHiddenChannels_AddContextMenuOptions() {
 
 	// Remove channels the div may already contain
-	let channels = $(followedChannelsListDivSelector_JQuery).find(`${channelDivClass},${channelDivClass2}`);
+	let channels = $(followedChannelsListDivSelector_JQuery).find(`${channelDivClass},${channelDivClass2},${channelDivClass3}`);
 	let hiddenChannelsAllCaps = hiddenChannels.map(c => c.toUpperCase());
 
 	$(channels).each(function () {
